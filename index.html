@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>up820346 WebGL Coursework</title>
+
+    <style>
+      .animation {
+        float: left;
+        padding-right: 20px;
+      }
+    </style>
+
+    <!-- External javascript file -->
+    <script type="text/javascript" src="js/glMatrix.js"></script>
+    <script type="text/javascript" src="js/webgl-debug.js"></script>
+    <script type="text/javascript" src="js/webgl-utils.js"></script>
+
+    <!-- Vertex shader javascript -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoordinates;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+
+    uniform mat3 uNMatrix;
+
+    varying vec2 vTextureCoordinates;
+    varying vec3 vNormalEye;
+    varying vec3 vPositionEye3;
+
+    void main() {
+      // Get the vertex position in camera/eye coordinates and send
+      // to the fragment shader
+      vec4 vertexPositionEye4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+      vPositionEye3 = vertexPositionEye4.xyz / vertexPositionEye4.w;
+
+      // Transform the normal to eye coordinates and send to fragment shader
+      vNormalEye = normalize(uNMatrix * aVertexNormal);
+
+      // Transform the geometry
+      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+      vTextureCoordinates = aTextureCoordinates;
+    }
+    </script>
+
+    <!-- Fragment shader script -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vTextureCoordinates;
+    varying vec3 vNormalEye;
+    varying vec3 vPositionEye3;
+
+    uniform vec3 uLightPosition;
+    uniform vec3 uAmbientLightColor;
+    uniform vec3 uDiffuseLightColor;
+    uniform vec3 uSpecularLightColor;
+    uniform sampler2D uSampler;
+
+    const float shininess = 64.0;
+
+    void main() {
+      // Calculate the vector (L) to the light source
+      vec3 vectorToLightSource = normalize(uLightPosition - vPositionEye3);
+
+      // Calculate N dot L for diffuse lighting
+      float diffuseLightWeighting = max(dot(vNormalEye, vectorToLightSource), 0.0);
+
+      // Calculate the reflection vector (R) that is needed for specular light
+      vec3 reflectionVector = normalize(reflect(-vectorToLightSource, vNormalEye));
+
+      // Calculate view vector (V) in eye coordinates as
+      // (0.0, 0.0, 0.0) - vPositionEye3
+      vec3 viewVectorEye = -normalize(vPositionEye3);
+      float rdotv = max(dot(reflectionVector, viewVectorEye), 0.0);
+      float specularLightWeighting = pow(rdotv, shininess);
+
+      // Sum up all three reflection components
+      vec3 lightWeighting = uAmbientLightColor +
+                          uDiffuseLightColor * diffuseLightWeighting +
+                          uSpecularLightColor * specularLightWeighting;
+
+      // Sample the texture
+      vec4 texelColor = texture2D(uSampler, vTextureCoordinates);
+
+      // Modulate texel color with lightweighthing and write as final color
+      gl_FragColor = vec4(lightWeighting.rgb * texelColor.rgb, texelColor.a);
+    }
+    </script>
+
+    <!-- Script for WebGL program -->
+    <script type="text/javascript" src="js/up820346.js"></script>
+  </head>
+  <body onload="startup();">
+    <div class="animation">
+      <canvas id="myGlCanvas" width="500" height="500"></canvas>
+      <!-- <canvas id="myGlCanvas" width="1000" height="1000"></canvas> -->
+      <div id="fps-counter"> FPS: <span id="fps">--</span></div>
+      <div id="satelite-speed"> Speed: <span id="speed">--</span> m/s</div>
+      <div id="orbit-radius"> Orbit radius: <span id="circleRadius">--</span> m</div>
+      <div id="satelite-period"> Satelite period: <span id="satelitePeriod">--</span> ms</div>
+      <div id="orbit-angle"> Orbit angle: <span id="orbitAngle">--</span>&deg;</div>
+    </div>
+
+    <p>This annimation is the piece of coursework from up820346</p>
+    <p>The satelite period is a result of the speed of the satelite and the radius of the orbit.</p>
+
+    <p>To translate and rotate the earth and satelite model use the following:</p>
+    <ul>
+      <li>x-trans: shift plus mouse drag or shift plus mouse wheel for finer control</li>
+      <li>y-trans: alt plus mouse drag or alt plus mouse wheel for finer control</li>
+      <li>z-trans: mouse wheel</li>
+      <li>x-rot: vertical mouse drag</li>
+      <li>y-rot: horizontal mouse drag</li>
+    </ul>
+    <p>To control this animation use the following:</p>
+    <ul>
+      <li>Use "arrow up" and "arrow down" to increase or decrease the satelite speed.</li>
+      <li>Use "arrow right" and "arrow left" to increase or decrease the satelite orbit radius.</li>
+      <li>Use "w" and "s" to increase or decrease the satelite orbit inclination.</li>
+    </ul>
+    <p>For more control on the animation parameters you can change the following variables values or use the functions provided in the terminal:</p>
+    <ul>
+      <li>variable "pwgl.sateliteSpeed" controls the satelite speed.</li>
+      <li>variable "pwgl.orbitRadius" controls the satelite orbit radius.</li>
+      <li>variable "pwgl.orbitInclination" controls the satelite orbit inclination being set in radians</li>
+      <li>function "setInclination(angle)" controls the satelite orbit inclination, with the angle in degrees</li>
+    </ul>
+
+  </body>
+</html>
