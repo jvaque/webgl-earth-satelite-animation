@@ -4,10 +4,6 @@ var pwgl = {};
 pwgl.ongoingImageLoads = [];
 var canvas;
 
-// Delete later
-var test = {};
-test.debug = false;
-
 // Variables for translations and rotations
 var transX = transY = 0, transZ = 0;
 var xRot = yRot = zRot = xOffs = yOffs = drag = 0;
@@ -149,12 +145,6 @@ function setupSphereBuffers() {
   var numberOfParallels = 200;
   var numberOfMeridians = 150;
   var sphereVertexPosition = [];
-  // for debuggin purposes
-  if(test.debug){
-    var tempVertexCoordinates = [];
-    var tempVertexIdeces = [];
-    var tempTextureCoordinates = [];
-  }
 
   var parallelAngle = 0;
   var meridianAngle = 0;
@@ -175,16 +165,7 @@ function setupSphereBuffers() {
       sphereVertexPosition.push(x);
       sphereVertexPosition.push(y);
       sphereVertexPosition.push(z);
-
-      // for debuggin purposes
-      if(test.debug) {
-        tempVertexCoordinates.push([x, y, z])
-      }
     }
-  }
-  // debug
-  if(test.debug) {
-    console.log(tempVertexCoordinates);
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphereVertexPosition), gl.STATIC_DRAW);
@@ -211,16 +192,7 @@ function setupSphereBuffers() {
 		  sphereVertexIndices.push(v3);
 		  sphereVertexIndices.push(v2);
 		  sphereVertexIndices.push(v4);
-      // debuggin purposes
-      if(test.debug){
-        tempVertexIdeces.push([v1, v2, v3]);
-        tempVertexIdeces.push([v3, v2, v4]);
-      }
 	  }
-  }
-  // debug
-  if(test.debug){
-    console.log(tempVertexIdeces);
   }
 
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(sphereVertexIndices), gl.STATIC_DRAW);
@@ -242,16 +214,7 @@ function setupSphereBuffers() {
       texY = 1 - (j * incrementMeridian);
       // push calculated values into the stack
       sphereVertexTextureCoodinates.push(texX, texY);
-
-      if(test.debug){
-        tempTextureCoordinates.push([texX, texY]);
-      }
     }
-  }
-
-  // debug
-  if(test.debug){
-    console.log(tempTextureCoordinates);
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphereVertexTextureCoodinates), gl.STATIC_DRAW);
@@ -297,12 +260,6 @@ function setupDishBuffers() {
   // var numberOfParallels = 50;
   // var numberOfMeridians = 30;
   var dishVertexPosition = [];
-  // for debuggin purposes
-  if(test.debug){
-    var tempVertexCoordinates = [];
-    var tempVertexIdeces = [];
-    var tempTextureCoordinates = [];
-  }
 
   var parallelAngle = 0;
   var meridianAngle = 0;
@@ -323,16 +280,7 @@ function setupDishBuffers() {
       dishVertexPosition.push(x);
       dishVertexPosition.push(y);
       dishVertexPosition.push(z);
-
-      // for debuggin purposes
-      if(test.debug) {
-        tempVertexCoordinates.push([x, y, z])
-      }
     }
-  }
-  // debug
-  if(test.debug) {
-    console.log(tempVertexCoordinates);
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(dishVertexPosition), gl.STATIC_DRAW);
@@ -358,16 +306,7 @@ function setupDishBuffers() {
 		  dishVertexIndices.push(v3);
 		  dishVertexIndices.push(v2);
 		  dishVertexIndices.push(v4);
-      // debuggin purposes
-      if(test.debug){
-        tempVertexIdeces.push([v1, v2, v3]);
-        tempVertexIdeces.push([v3, v2, v4]);
-      }
 	  }
-  }
-  // debug
-  if(test.debug){
-    console.log(tempVertexIdeces);
   }
 
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(dishVertexIndices), gl.STATIC_DRAW);
@@ -389,16 +328,7 @@ function setupDishBuffers() {
       texY = 1 - (j * incrementMeridian);
       // push calculated values into the stack
       dishVertexTextureCoodinates.push(texX, texY);
-
-      if(test.debug){
-        tempTextureCoordinates.push([texX, texY]);
-      }
     }
-  }
-
-  // debug
-  if(test.debug){
-    console.log(tempTextureCoordinates);
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(dishVertexTextureCoodinates), gl.STATIC_DRAW);
@@ -617,10 +547,6 @@ function setupTextures() {
   pwgl.goldenTexture = gl.createTexture();
   loadImageForTexture("textures/gold_foil.jpg", pwgl.goldenTexture);
 
-  // Texture for the floor
-  pwgl.groundTexture = gl.createTexture();
-  loadImageForTexture("textures/wood_floor_256.jpg", pwgl.groundTexture);
-
   // Texture for the solar panel
   pwgl.solarTexture = gl.createTexture();
   loadImageForTexture("textures/solar_panel.jpg", pwgl.solarTexture);
@@ -630,10 +556,8 @@ function setupTextures() {
   loadImageForTexture("textures/satelite_body.jpg", pwgl.sateliteTexture);
 
   pwgl.sphereTexture = gl.createTexture();
-  // loadImageForTexture("textures/land_ocean_ice_cloud_2048.jpg", pwgl.sphereTexture);
   loadImageForTexture("textures/earth.jpg", pwgl.sphereTexture);
-  // loadImageForTexture("textures/beans.jpg", pwgl.sphereTexture);
-  // loadImageForTexture("textures/untitled.jpg", pwgl.sphereTexture);
+  // loadImageForTexture("textures/land_ocean_ice_cloud_2048.jpg", pwgl.sphereTexture);
 }
 
 function loadImageForTexture(url, texture) {
@@ -833,9 +757,9 @@ function init() {
   setupBuffers();
   setupLights();
   setupTextures();
-  gl.clearColor(0.9, 0.9, 0.9, 1.0); //Someting that is not black or white
+  // gl.clearColor(0.9, 0.9, 0.9, 1.0); //Someting that is not black or white
   // gl.clearColor(1.0, 1.0, 1.0, 1.0); //White background
-  // gl.clearColor(0.0, 0.0, 0.0, 1.0); //Black background
+  gl.clearColor(0.0, 0.0, 0.0, 1.0); //Black background
   gl.enable(gl.DEPTH_TEST);
 
   // Initialize some variables for the satelite
@@ -847,7 +771,7 @@ function init() {
   pwgl.sateliteSpeed = 30.0;
 
   // Earth rotation period in miliseconds
-  pwgl.earthPeriod = 30000;
+  pwgl.earthPeriod = 24000;
 
   // Initialize some variables related to the animation
   pwgl.animationStartTime = undefined;
