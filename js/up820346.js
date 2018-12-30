@@ -5,7 +5,7 @@ pwgl.ongoingImageLoads = [];
 var canvas;
 
 // Variables for translations and rotations
-var transX = transY = 0, transZ = 0;
+var transX = transY = transZ = 0;
 var xRot = yRot = zRot = xOffs = yOffs = drag = 0;
 
 // Keep track of pressed down keys
@@ -13,10 +13,17 @@ pwgl.listOffPressedKeys = [];
 
 // Start of functions
 // -----------------------------------------------------------------------------
+/*
+  Function to set the orbit inclination angle, takes in a angle in degrees and
+sets the orbit inclination to that angle converting it to radians
+*/
 function setInclination(angle) {
   pwgl.orbitInclination = angle * (Math.PI/180);
 }
 
+/*
+  Creates the WebGL context for the canvas, returning said context
+*/
 function createGLContext(canvas) {
   var names = ["webgl", "experimental-webgl"];
   var context = null;
@@ -39,13 +46,11 @@ function createGLContext(canvas) {
 
 function loadShaderFromDOM(id) {
   var shaderScript = document.getElementById(id);
-
   // If we dont find an element with the specified id
   // we do and early exit
   if (!shaderScript) {
     return null;
   }
-
   // Otherwise loop though the clildren for the found DOM element and
   // build up the shader source code as a string
   var shaderSource = "";
@@ -57,7 +62,6 @@ function loadShaderFromDOM(id) {
     }
     currentChild =currentChild.nextSibling;
   }
-
   // Create a WebGL shader object according to type of shader, i.e.,
   // vertex or fragment shader.
   var shader;
@@ -138,14 +142,15 @@ function popModelViewMatrix() {
 
 // -----------------------------------------------------------------------------
 function setupSphereBuffers() {
-  pwgl.sphereVertexPositionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, pwgl.sphereVertexPositionBuffer);
-
   var radius = 10; //Must be 10 for the coursework
   var numberOfParallels = 200;
   var numberOfMeridians = 150;
-  var sphereVertexPosition = [];
 
+  // Set sphere vertex position buffers
+  pwgl.sphereVertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, pwgl.sphereVertexPositionBuffer);
+
+  var sphereVertexPosition = [];
   var parallelAngle = 0;
   var meridianAngle = 0;
   var x = y = z = 0;
@@ -172,17 +177,19 @@ function setupSphereBuffers() {
   pwgl.SPHERE_VERTEX_POS_BUF_ITEM_SIZE = 3;
   pwgl.SPHERE_VERTEX_POS_BUF_NUM_ITEMS = sphereVertexPosition.length
 
+  // Set sphere vertex indices buffers
   pwgl.sphereVertexIndexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pwgl.sphereVertexIndexBuffer);
 
   var sphereVertexIndices = [];
   var v1 = v2 = v3 = v4 = 0
+
   for (var i=0; i < numberOfParallels; i++) {
     for (var j=0; j < numberOfMeridians; j++) {
       v1 = i*(numberOfMeridians+1) + j;//index of vi,j
-      v2 = v1 + 1;     //index of vi,j+1
+      v2 = v1 + 1;                     //index of vi,j+1
 		  v3 = v1 + numberOfMeridians + 1; //index of vi+1,j
-      v4 = v3 + 1;     //index of vi+1,j+1
+      v4 = v3 + 1;                     //index of vi+1,j+1
 
 		  // indices of first triangle
 		  sphereVertexIndices.push(v1);
@@ -199,7 +206,7 @@ function setupSphereBuffers() {
   pwgl.SPHERE_VERTEX_INDEX_BUF_ITEM_SIZE = 1;
   pwgl.SPHERE_VERTEX_INDEX_BUF_NUM_ITEMS = sphereVertexIndices.length;
 
-  // Setup buffer with texture coordinates
+  // Set sphere texture coordinates buffer
   pwgl.sphereVertexTextureCoordinateBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, pwgl.sphereVertexTextureCoordinateBuffer);
 
@@ -936,11 +943,11 @@ function mymouseup(ev) {
 function mymousemove(ev) {
   if (drag == 0) return;
   if (ev.shiftKey) {
-    // transZ = (ev.clientY - yOffs)/10;
     transX = (ev.clientY - yOffs)/10;
-    // zRot = (- xOffs + ev.clientX);
   } else if (ev.altKey) {
     transY = -(ev.clientY - yOffs)/10;
+  } else if (ev.ctrlKey) {
+    zRot = ( yOffs - ev.clientY)/10;
   } else {
     yRot = (- xOffs + ev.clientX)/10;
     xRot = (- yOffs + ev.clientY)/10;
